@@ -1,0 +1,116 @@
+------------------------------------------------------------
+0. ENVIRONMENT
+date        : 2026-09-29 09:42:33 +08
+host        : Darwin 27.0.0 arm64  macOS 27.0
+hermes      : Hermes Agent v0.21.5+3840.g9a0a162 (2026.9.24) · upstream 68fa7e9f
+prefix      : /Users/paulrydrickpuri/.hermes
+baseline    : /Users/paulrydrickpuri/.hermes/backups/flow-wrappers-pre-v2.4.0-20260928-144648
+------------------------------------------------------------
+1. FLOW PAIR — present in which trees, and is it identical there?
+TREE           flow-build/SKILL.md                            md5
+profiles/architect FOUND                                          916c3088b84ab0deedb183448fd0f6f5
+profiles/builder FOUND                                          916c3088b84ab0deedb183448fd0f6f5
+profiles/codemax FOUND                                          916c3088b84ab0deedb183448fd0f6f5
+profiles/decider FOUND                                          916c3088b84ab0deedb183448fd0f6f5
+profiles/doubter FOUND                                          916c3088b84ab0deedb183448fd0f6f5
+profiles/planner FOUND                                          916c3088b84ab0deedb183448fd0f6f5
+skills         FOUND                                          916c3088b84ab0deedb183448fd0f6f5
+------------------------------------------------------------
+2. PRE-CHANGE BASELINE (captured 2026-09-28, before the v2.4.0 edit)
+flow-decide  26b643ec35d84ae43f70c549a2fe8418  140 lines
+flow-build   bb883735b03995e90f1487c753ddc68e  159 lines
+------------------------------------------------------------
+3. VERSION DELTA — baseline vs the codemax tree's current wrappers
+flow-decide  +35   -0    (baseline 140 lines -> current 185 lines)
+flow-build   +56   -4    (baseline 159 lines -> current 224 lines)
+------------------------------------------------------------
+4. PONYTAIL PACK — 6 skill dirs? (architect/planner/builder by design; decider/doubter excluded)
+TREE           COUNT  READ
+profiles/architect 6      pack present
+profiles/builder 6      pack present
+profiles/codemax 6      pack present
+profiles/decider 0      absent
+profiles/doubter 0      absent
+profiles/planner 6      pack present
+skills         6      pack present
+------------------------------------------------------------
+5. /simplify-code — decides flow-build Step 3's path per tree
+TREE           LIVE     ARCHIVED
+profiles/architect no       yes
+profiles/builder yes      yes
+profiles/codemax no       yes
+profiles/decider no       yes
+profiles/doubter no       yes
+profiles/planner no       yes
+skills         no       yes
+------------------------------------------------------------
+6. PIPELINE DOC — does each tree carry the v2.4.0 sections?
+TREE           LINES  v2.4.0         md5
+profiles/architect 100    MISSING        36440a4345b99f8af19f8482f98d323b
+profiles/builder 100    MISSING        36440a4345b99f8af19f8482f98d323b
+profiles/codemax 277    present        d0a2c705ff3eb22910b61d1c3617bc2f
+profiles/decider 100    MISSING        36440a4345b99f8af19f8482f98d323b
+profiles/doubter 100    MISSING        36440a4345b99f8af19f8482f98d323b
+profiles/planner 100    MISSING        36440a4345b99f8af19f8482f98d323b
+skills         100    MISSING        36440a4345b99f8af19f8482f98d323b
+------------------------------------------------------------
+7. UPSTREAM RELEASE the wrappers were aligned to
+{"name":"v2.4.0","publishedAt":"2026-09-25T06:27:24Z","tagName":"v2.4.0"}
+
+CHECKS (target: /Users/paulrydrickpuri/.hermes)
+PASS  A. flow pair present in all 7 trees          7
+PASS  B. all 7 flow-build copies byte-identical    1
+PASS  C. all 7 flow-decide copies byte-identical   1
+PASS  D. no tree has a partial ponytail pack       0
+PASS  E. ponytail absent on both judging roles     0
+FAIL  F. pipeline doc v2.4.0 section in all 7      got=1 want=7
+
+live-tree failures: 1 — each FAIL is a real, currently-open gap, not a broken probe.
+  A,B,C,D,E pass: pair present in all 7 trees, both wrappers byte-identical across them,
+                  no partial pack, pack absent on both judging roles.
+  F fails:  the pipeline doc's v2.4.0 sections reach codemax only — see docs/known-gaps.md
+
+=== SELFTEST 0: clean scratch tree — every check must PASS ===
+CHECKS (target: /var/folders/0x/d9yw5b014r59b6xgc0bbkg740000gn/T//flow-verify-selftest.VOS1tF/prefix)
+PASS  A. flow pair present in all 7 trees          7
+PASS  B. all 7 flow-build copies byte-identical    1
+PASS  C. all 7 flow-decide copies byte-identical   1
+PASS  D. no tree has a partial ponytail pack       0
+PASS  E. ponytail absent on both judging roles     0
+PASS  F. pipeline doc v2.4.0 section in all 7      7
+
+  clean-tree failures: 0 (want 0)
+
+=== SELFTEST 1: delete a tree's flow pair (check A must FAIL) ===
+FAIL  A. flow pair present in all 7 trees          got=6 want=7
+  -> A FAIL (want FAIL)
+
+=== SELFTEST 2: drift ONE flow-build copy (check B must FAIL) ===
+FAIL  B. all 7 flow-build copies byte-identical    got=2 want=1
+  -> B FAIL (want FAIL)
+
+=== SELFTEST 3: drift ONE flow-decide copy (check C must FAIL) ===
+FAIL  C. all 7 flow-decide copies byte-identical   got=2 want=1
+  -> C FAIL (want FAIL)
+
+=== SELFTEST 4: drop 3 ponytail dirs from a pack tree (check D must FAIL) ===
+FAIL  D. no tree has a partial ponytail pack       got=1 want=0
+  -> D FAIL (want FAIL)
+
+=== SELFTEST 5: install the pack into a judging role (check E must FAIL) ===
+FAIL  E. ponytail absent on both judging roles     got=1 want=0
+  -> E FAIL (want FAIL)
+
+=== SELFTEST 6: revert one tree's pipeline doc (check F must FAIL) ===
+FAIL  F. pipeline doc v2.4.0 section in all 7      got=6 want=7
+  -> F FAIL (want FAIL)
+
+------------------------------------------------------------
+SELFTEST SUMMARY
+  check A can fail: PROVEN
+  check B can fail: PROVEN
+  check C can fail: PROVEN
+  check D can fail: PROVEN
+  check E can fail: PROVEN
+  check F can fail: PROVEN
+RESULT: every check is both satisfiable and fail-able.

@@ -1,0 +1,114 @@
+--- /Users/paulrydrickpuri/.hermes/backups/flow-wrappers-pre-v2.4.0-20260928-144648/flow-build.SKILL.md	2026-08-15 12:26:13
++++ /Users/paulrydrickpuri/.hermes/profiles/codemax/skills/openclaw-imports/flow-build/SKILL.md	2026-09-28 18:04:46
+@@ -40,6 +40,12 @@
+ (GREEN + REFACTOR), with a coordinator gate between them. Do not collapse the two —
+ the failing-test gate is the reason to use it.
+ 
++**Where the pack is present, `/ponytail` applies to the implementation too — but it never
++outranks this gate**, and the pack says so itself: *"Never a reason to skip gates: the rule
++trades less code for more thinking, not for skipped tests."* TDD's RED gate wins every time.
++If a "lazier" solution cannot be expressed as a failing test first, it is not the lazier
++solution; it is an untested one.
++
+ Commit per task. Do not batch tasks into one commit: a per-task commit is what makes
+ `git bisect` useful later, and what lets a single bad task be reverted alone.
+ 
+@@ -71,12 +77,46 @@
+ 
+ ## Step 3 — Simplify
+ 
+-Invoke `/simplify-code` — the Hermes core skill. It is deliberately unprefixed; the
+-Claude plugin called it `/simplify`, but the installed skill is `simplify-code`.
++**Where the ponytail pack is present**, apply `/ponytail` to your own diff first — climb the
++ladder against code you just wrote, which is where speculative abstraction is easiest to see
++— then invoke `/ponytail-review` on the same diff. The review is the defined
++over-engineering pass — one line per finding: location, what to cut, what
++replaces it (reinvented standard library, unneeded dependency, speculative abstraction,
++dead flexibility). Where the pack is absent (`decider`, `doubter`) it cannot run; that is
++expected, and this step is a no-op there.
+ 
++**Where `/simplify-code` resolves**, it also runs, and it runs **first** — it is the
++broader pass (dead code, duplication, speculative abstraction), so let it work before the
++ponytail pass looks specifically for over-engineering.
++
++Availability, measured on this box **2026-09-28**:
++
++- `/simplify-code` resolves on **`builder`** only — live at
++  `~/.hermes/profiles/builder/skills/software-development/simplify-code`, and at the repo
++  tree `~/.hermes/hermes-agent/skills/software-development/simplify-code`.
++- On `codemax`, `architect`, `planner`, `decider` and `doubter` it sits under
++  `skills/.archive/` — a deliberate prune, not an accident. Do not resurrect it unless the
++  user asks; the ponytail pass is the intended substitute.
++- **An earlier revision of this file claimed it "exists only on the `default` profile, and
++  neither `codemax` nor any bot profile ships it". That was backwards** (it is live on
++  `builder`) and contradicted this same paragraph. Corrected here.
++
++So: on `architect` and `planner` the ponytail pass carries this step alone; on `builder`
++both run, `/simplify-code` first; anywhere else, report the skip and why.
++
++**Ledger.** Then run `/ponytail-debt` and record its counted output — each `ponytail:`
++marker in the diff is one row:
++
++```
++grep -rnE '(#|//) ?ponytail:' .
++```
++
++Report `<N> markers, <M> with no trigger.` A clean ledger reports
++`No ponytail: debt. Clean ledger.` — that is a legitimate outcome, not a failure.
++
+ Runs **before** `/observe`, deliberately. Instrumentation is intentionally verbose —
+-correlation IDs, structured fields, span attributes. Simplify the feature code first,
+-then add telemetry, so simplification cannot strip the telemetry you are about to add.
++correlation IDs, structured fields, span attributes. Simplify the feature code first, then
++add telemetry, so simplification cannot strip the telemetry you are about to add.
+ 
+ ## Step 4 — Observe (conditional)
+ 
+@@ -121,6 +161,10 @@
+ Fix Critical findings before proceeding. Warnings are a judgement call; record the
+ call rather than silently passing over it.
+ 
++**No ponytail pass here.** A second over-engineering lens at Step 6 was considered and is
++**not adopted** — the pack's pass lives at Step 3, where the code is still being shaped.
++`/code-review` at this step is unchanged.
++
+ ## Step 7 — PR
+ 
+ Invoke `/github-pr-workflow` (Hermes core — the tapway `pr` skill is security-blocked
+@@ -143,11 +187,30 @@
+ Security:  [findings, or "skipped — no sensitive surface touched"]
+ Review:    [N] critical fixed, [N] warnings [accepted/fixed]
+ PR:        #[N] — [title]
++Simplify:  /ponytail-review: [N] cuts  |  debt: [N] markers, [M] no-trigger
+ ```
+ 
+ Every conditional step reports either what it did or why it was skipped. A silent
+ skip is indistinguishable from a step that never ran.
+ 
++**`/ponytail-gain` is display-allowed, per-repo numbers are not.** Its own text: *"These
++are benchmark medians, not this repo. NEVER print a per-repo savings number … The only
++real per-repo figures come from `/ponytail-debt` (a counted ledger)."* So the gain card
++may appear in the report only as a **labelled benchmark card**; it must never be turned
++into "this build saved X lines/tokens". The unbuilt version was never written, so there is
++no baseline to subtract from.
++
++## Budget — measured, not guessed
++
++A real 13-task build (logic core -> rendering -> evidence harness) consumed **150 tool calls** and hit the
++agent turn budget *before* `/simplify-code` and `/code-review` could run. Two rules follow:
++
++- **Raise the budget before a long build:** `hermes -p <bot> config set agent.max_turns 300` (the measured
++  build needed more than 150; the setting is per-profile, so set it on the builder only).
++- **If it still runs out, finish the remaining quality steps as a SECOND PASS** on the same plan — never
++  skip them silently. Report which steps did not run. A stopped run that says what it did not do is worth
++  far more than one that implies completeness.
++
+ ## Red flags
+ 
+ - ❌ Building a plan with no `## Doubt Gate — PASSED` block
+@@ -157,3 +220,5 @@
+ - ❌ Running `/security-audit` before `/observe` (misses PII in new log lines)
+ - ❌ Batching several tasks into one commit
+ - ❌ Grinding a third attempt at a task that has blocked twice
++- ❌ Letting the ponytail rule past a gate — it never outranks TDD's RED gate
++- ❌ Printing a per-repo savings number from `/ponytail-gain` (benchmark medians only)

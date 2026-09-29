@@ -1,0 +1,7 @@
+# macOS
+.DS_Store
+
+# scratch / local captures — the tracked evidence captures are named explicitly
+evidence/*-output-*.txt
+!evidence/verify-output-*.txt
+!evidence/selftest-output.txt
