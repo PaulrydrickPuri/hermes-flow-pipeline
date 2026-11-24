@@ -1,7 +1,12 @@
 # Known gaps
 
-Open items as of **2026-09-29**. Each one is measured, not estimated, and each
+Open items as of **2026-11-24**. Each one is measured, not estimated, and each
 says what closing it would actually require.
+
+> **2026-11-24:** the gaps between the team's published pipeline and this Hermes
+> implementation (gbrain wiring, `db-reviewer`, `/repo-wiki-writer`,
+> `/deep-research`, three-copy drift) are planned in
+> [`plans/pr-tail-gaps.md`](plans/pr-tail-gaps.md), tracked as issue #2.
 
 ---
 
